@@ -10,6 +10,38 @@ const HYPHEN = 0x002d;
 const TOLERANCE_STEPS = 5;
 const TOLERANCE_LIMIT = 50;
 
+const NO_BREAK_SYMBOLS = [
+  ',',
+  '.',
+  '!',
+  '?',
+  ':',
+  ';',
+  '(',
+  ')',
+  '[',
+  ']',
+  '{',
+  '}',
+  "'",
+  '"',
+  '`',
+  '~',
+  '|',
+  '\\',
+  '/',
+  '=',
+  '+',
+  '-',
+  '*',
+  '&',
+  '^',
+  '%',
+  '$',
+  '#',
+  '@',
+];
+
 const opts = {
   width: 3,
   stretch: 6,
@@ -99,13 +131,17 @@ const getNodes = (
       // Add glue node. Glue nodes are used to fill the space between words.
       acc.push(knuthPlass.glue(width, start, end, stretch, shrink));
     } else {
-      const hyphenated = syllables[index + 1] !== ' ';
+      const nextSyllable = syllables[index + 1];
+
+      const firstChar = nextSyllable?.[0];
+      const hyphenated =
+        nextSyllable !== ' ' && !NO_BREAK_SYMBOLS.includes(firstChar);
       const end = start + s.length;
 
       // Add box node. Box nodes are used to represent words.
       acc.push(knuthPlass.box(width, start, end, hyphenated));
 
-      if (syllables[index + 1] && hyphenated) {
+      if (nextSyllable && hyphenated) {
         // Add penalty node. Penalty nodes are used to represent hyphenation points.
         acc.push(knuthPlass.penalty(hyphenWidth, hyphenPenalty, 1));
       }
